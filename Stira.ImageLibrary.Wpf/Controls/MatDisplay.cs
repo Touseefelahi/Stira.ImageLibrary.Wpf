@@ -1,18 +1,9 @@
 ﻿using Emgu.CV;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Stira.ImageLibrary.Wpf
 {
@@ -24,22 +15,23 @@ namespace Stira.ImageLibrary.Wpf
         // Using a DependencyProperty as the backing store for Image. This enables animation,
         // styling, binding, etc...
         public static readonly DependencyProperty ImageProperty =
-            DependencyProperty.Register("Image", typeof(Mat), typeof(MatDisplay), new PropertyMetadata(0));
+            DependencyProperty.Register("Image", typeof(Mat), typeof(MatDisplay), new PropertyMetadata(null));
 
         /// <summary>
         /// Frame counter is actually beign used to update the frame from rawbytes array
         /// </summary>
         public static readonly DependencyProperty FrameCounterProperty =
-            DependencyProperty.Register("FrameCounter", typeof(int), typeof(LightImage), new PropertyMetadata(0, MatUpdated));
+            DependencyProperty.Register("FrameCounter", typeof(int), typeof(MatDisplay), new PropertyMetadata(0, MatUpdated));
 
         private WriteableBitmap SourceImage;
 
         private Int32Rect rectBitmap;
+        private int numberOfChannels = 1;
 
         public Mat Image
         {
-            get { return (Mat)GetValue(ImageProperty); }
-            set { SetValue(ImageProperty, value); }
+            get => (Mat)GetValue(ImageProperty);
+            set => SetValue(ImageProperty, value);
         }
 
         public int FrameCounter
@@ -58,11 +50,14 @@ namespace Stira.ImageLibrary.Wpf
 
         private void ShowImage()
         {
-            if (Image.Width != rectBitmap.Width || Image.Height != rectBitmap.Height)
+            if (Image.Width != rectBitmap.Width || Image.Height != rectBitmap.Height || numberOfChannels != Image.NumberOfChannels)
             {
                 SetupImage();
             }
-            SourceImage.WritePixels(rectBitmap, Image.GetData(), Image.Width * Image.NumberOfChannels, 0);
+            SourceImage.WritePixels(rectBitmap,
+                Image.DataPointer, //Buffer
+                Image.Width * Image.NumberOfChannels * Image.Height, //Total buffer size
+                Image.Width * Image.NumberOfChannels); //Stride
             Source = SourceImage;
         }
 
@@ -74,10 +69,11 @@ namespace Stira.ImageLibrary.Wpf
                 rectBitmap = new Int32Rect(0, 0, Image.Width, Image.Height);
                 List<Color> colors = new List<Color> { Colors.Gray };
                 BitmapPalette myPalette;
+                numberOfChannels = Image.NumberOfChannels;
                 PixelFormat format = PixelFormats.Gray8;
                 if (Image.NumberOfChannels == 3)
                 {
-                    colors = new List<Color> { Colors.Red, Colors.Green, Colors.Blue };
+                    colors = new List<Color> { Colors.Blue, Colors.Green, Colors.Red };
                     format = PixelFormats.Bgr24;
                 }
                 myPalette = new BitmapPalette(colors);

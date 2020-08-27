@@ -8,5 +8,4 @@
   <ItemGroup>
     <PackageReference Include="Emgu.CV" Version="4.3.0.3890" />
   </ItemGroup>
-
 </Project>
