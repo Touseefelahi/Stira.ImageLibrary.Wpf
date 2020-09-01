@@ -43,11 +43,10 @@ e.g.
 
       xmlns:il="clr-namespace:Stira.ImageLibrary.Wpf;assembly=Stira.ImageLibrary.Wpf"
       
-       <il:MatDisplay Margin="5,50,5,5" Image="{Binding Image}" 
-           Width="1024" Height="768"  FrameCounter="{Binding FrameCounter}" />
+      <il:MatDisplay Margin="5,50,5,5" Image="{Binding Image}" 
+       Width="1024" Height="768"  FrameCounter="{Binding FrameCounter}" />
 
-And in the backend we must Update FrameCounter to refresh the image at every new frame
-e.g.
+#### And in the backend we must Update FrameCounter to refresh the image at every new frame e.g.
 
 
         public StreamViewModel()
@@ -59,6 +58,7 @@ e.g.
             Camera.Updates += StreamUpdates;
             Image = new Mat((int)Camera.Height, (int)Camera.Width, 
                              Emgu.CV.CvEnum.DepthType.Cv8U, 1);
+            RaisePropertyChanged(nameof(Image));
         }
 
         public int FrameCounter
@@ -73,8 +73,7 @@ e.g.
         {
             if (rawBytes != null)
             {
-                Marshal.Copy(rawBytes, 0, Image.DataPointer, rawBytes.Length);
-                RaisePropertyChanged(nameof(Image));
-                FrameCounter++;
+                Marshal.Copy(rawBytes, 0, Image.DataPointer, rawBytes.Length);             
+                FrameCounter++; //Change in frameCounter refreshes the Image
             }
         }
