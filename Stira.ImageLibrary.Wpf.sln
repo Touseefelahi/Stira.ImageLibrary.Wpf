@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30413.136
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stira.ImageLibrary.Wpf", "Stira.ImageLibrary.Wpf\Stira.ImageLibrary.Wpf.csproj", "{0F798F76-7584-497C-A3D7-BF6FEC911E20}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Stira.ImageLibrary.Wpf", "Stira.ImageLibrary.Wpf\Stira.ImageLibrary.Wpf.csproj", "{0F798F76-7584-497C-A3D7-BF6FEC911E20}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{A1F1B156-AE0B-46BD-AA4D-64E9A9441DFC}"
 	ProjectSection(SolutionItems) = preProject
@@ -13,11 +13,14 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		PublishOnLocal|Any CPU = PublishOnLocal|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{0F798F76-7584-497C-A3D7-BF6FEC911E20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0F798F76-7584-497C-A3D7-BF6FEC911E20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F798F76-7584-497C-A3D7-BF6FEC911E20}.PublishOnLocal|Any CPU.ActiveCfg = PublishOnLocal|Any CPU
+		{0F798F76-7584-497C-A3D7-BF6FEC911E20}.PublishOnLocal|Any CPU.Build.0 = PublishOnLocal|Any CPU
 		{0F798F76-7584-497C-A3D7-BF6FEC911E20}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0F798F76-7584-497C-A3D7-BF6FEC911E20}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection

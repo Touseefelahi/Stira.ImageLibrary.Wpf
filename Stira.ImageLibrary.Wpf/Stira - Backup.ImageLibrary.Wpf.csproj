@@ -22,8 +22,16 @@
   <Choose>
     <When Condition=" '$(Configuration)'=='PublishOnLocal' ">
       <PropertyGroup>
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>full</DebugType>
+        <Optimize>false</Optimize>
         <OutputPath>..\\..\\All Packages\</OutputPath>
+        <DefineConstants>DEBUG;TRACE</DefineConstants>
       </PropertyGroup>
+      <ItemGroup>
+        <Compile Include="UnitTesting\*.cs" />
+        <Reference Include="NUnit.dll" />
+      </ItemGroup>
     </When>
   </Choose>
 
