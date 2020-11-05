@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -10,7 +9,7 @@ namespace Stira.ImageLibrary.Wpf
     /// <summary>
     /// Image for Raw Bytes
     /// </summary>
-    public class LightImage : Image
+    public class LightImage : BaseImage
     {
         // Using a DependencyProperty as the backing store for ImagePtr. This enables animation,
         // styling, binding, etc...
@@ -37,19 +36,13 @@ namespace Stira.ImageLibrary.Wpf
         public static readonly DependencyProperty RawBytesProperty =
             DependencyProperty.Register("RawBytes", typeof(byte[]), typeof(LightImage), new PropertyMetadata(null));
 
-        private WriteableBitmap SourceImage;
-
-        private Int32Rect rectBitmap;
-
-        private int bytesPerPixel = 1;
-
         public byte[] RawBytes
         {
             get => (byte[])GetValue(RawBytesProperty);
             set
             {
                 SetValue(RawBytesProperty, value);
-                SourceImage.WritePixels(rectBitmap, RawBytes, WidthImage * bytesPerPixel, 0);
+                SourceImage.WritePixels(rectBitmap, RawBytes, WidthImage * numberOfChannels, 0);
                 Source = SourceImage;
             }
         }
@@ -62,7 +55,7 @@ namespace Stira.ImageLibrary.Wpf
                 if (value != IsColored)
                 {
                     SetValue(IsColoredProperty, value);
-                    bytesPerPixel = IsColored ? 3 : 1;
+                    numberOfChannels = IsColored ? 3 : 1;
                     SetupImage();
                 }
             }
@@ -74,7 +67,7 @@ namespace Stira.ImageLibrary.Wpf
             set
             {
                 SetValue(ImagePtrProperty, value);
-                SourceImage.WritePixels(rectBitmap, ImagePtr, WidthImage * HeightImage * bytesPerPixel, WidthImage * bytesPerPixel);
+                SourceImage.WritePixels(rectBitmap, ImagePtr, WidthImage * HeightImage * numberOfChannels, WidthImage * numberOfChannels);
                 Source = SourceImage;
             }
         }
@@ -108,7 +101,7 @@ namespace Stira.ImageLibrary.Wpf
                 List<Color> colors = new List<Color> { Colors.Gray };
                 BitmapPalette myPalette;
                 PixelFormat format = PixelFormats.Gray8;
-                if (bytesPerPixel == 3)
+                if (numberOfChannels == 3)
                 {
                     colors = new List<Color> { Colors.Red, Colors.Green, Colors.Blue };
                     format = PixelFormats.Bgr24;

@@ -10,6 +10,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{A1F1B156-A
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stira.ImageLibrary.WpfTest", "Stira.ImageLibrary.WpfTest\Stira.ImageLibrary.WpfTest.csproj", "{E4808854-02E9-45A9-87D6-DC1F5819581A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +25,12 @@ Global
 		{0F798F76-7584-497C-A3D7-BF6FEC911E20}.PublishOnLocal|Any CPU.Build.0 = PublishOnLocal|Any CPU
 		{0F798F76-7584-497C-A3D7-BF6FEC911E20}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0F798F76-7584-497C-A3D7-BF6FEC911E20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E4808854-02E9-45A9-87D6-DC1F5819581A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E4808854-02E9-45A9-87D6-DC1F5819581A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E4808854-02E9-45A9-87D6-DC1F5819581A}.PublishOnLocal|Any CPU.ActiveCfg = Release|Any CPU
+		{E4808854-02E9-45A9-87D6-DC1F5819581A}.PublishOnLocal|Any CPU.Build.0 = Release|Any CPU
+		{E4808854-02E9-45A9-87D6-DC1F5819581A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E4808854-02E9-45A9-87D6-DC1F5819581A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

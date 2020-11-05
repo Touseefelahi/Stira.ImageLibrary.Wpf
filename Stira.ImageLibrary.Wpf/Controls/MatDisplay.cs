@@ -10,7 +10,7 @@ namespace Stira.ImageLibrary.Wpf
     /// <summary>
     /// Image for Opencv Mat from EMGU library
     /// </summary>
-    public class MatDisplay : Image
+    public class MatDisplay : BaseImage
     {
         // Using a DependencyProperty as the backing store for Image. This enables animation,
         // styling, binding, etc...
@@ -18,15 +18,10 @@ namespace Stira.ImageLibrary.Wpf
             DependencyProperty.Register("Image", typeof(Mat), typeof(MatDisplay), new PropertyMetadata(null));
 
         /// <summary>
-        /// Frame counter is actually beign used to update the frame from rawbytes array
+        /// Frame counter is actually begin used to update the frame from rawbytes array
         /// </summary>
         public static readonly DependencyProperty FrameCounterProperty =
             DependencyProperty.Register("FrameCounter", typeof(int), typeof(MatDisplay), new PropertyMetadata(0, MatUpdated));
-
-        private WriteableBitmap SourceImage;
-
-        private Int32Rect rectBitmap;
-        private int numberOfChannels = 1;
 
         public Mat Image
         {

@@ -5,18 +5,20 @@
     <UseWPF>true</UseWPF>
     <Authors>Touseef</Authors>
     <Company>Stira.sa</Company>
-    <Description>This library have a control that can display raw bytes as image int ImageControl in WPF</Description>
+    <Description>This library have a control that can display raw bytes as image int ImageControl in WPF
+</Description>
     <RepositoryUrl>https://github.com/Touseefelahi/Stira.ImageLibrary.Wpf</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>WPF, Image Control, EMGU MAT Display</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageReleaseNotes>
-      In this release, there's an ugly way of refreshing the frame: i.e. FrameCounter++
+    <PackageReleaseNotes>v2.0: Gives Zooming and panning feature with transform operation in context menu
+      v1.0: In this release, there's an ugly way of refreshing the frame: i.e. FrameCounter++
       This must be fixed
-    </PackageReleaseNotes>
+</PackageReleaseNotes>
     <Configurations>Debug;Release;PublishOnLocal</Configurations>
+    <Version>2.0.0</Version>
   </PropertyGroup>
 
   <Choose>
