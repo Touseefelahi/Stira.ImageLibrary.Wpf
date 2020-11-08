@@ -25,7 +25,7 @@ namespace Stira.ImageLibrary.Wpf
             };
             DefaultScale = new MenuItem
             {
-                Header = "Default Scale"
+                Header = "Fit On Screen"
             };
             Items.Add(OneToOnePixel);
             Items.Add(FlipVertical);

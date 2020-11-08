@@ -53,7 +53,7 @@ namespace Stira.ImageLibrary.Wpf
                 Image.DataPointer, //Buffer
                 Image.Width * Image.NumberOfChannels * Image.Height, //Total buffer size
                 Image.Width * Image.NumberOfChannels); //Stride
-            Source = SourceImage;
+            imageViewer.Source = SourceImage;
         }
 
         private void SetupImage()

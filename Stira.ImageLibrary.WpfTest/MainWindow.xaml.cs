@@ -20,15 +20,25 @@ namespace Stira.ImageLibrary.WpfTest
     /// </summary>
     public partial class MainWindow : Window
     {
-        private byte[] rawImage;
-
         public MainWindow()
         {
             InitializeComponent();
             DataContext = this;
-            image.WidthImage = 1024;
-            image.HeightImage = 768;
-            image.RawBytes = new byte[1024 * 768 * 3];
+            image.WidthImage = 2048;
+            image.HeightImage = 1536;
+            image.IsColored = true;
+            var rawBytes = new byte[image.WidthImage * image.HeightImage * 3];
+            for (int r = 0; r < image.HeightImage; r++)
+            {
+                for (int c = 0; c < image.WidthImage; c++)
+                {
+                    if (r % 2 == 0)
+                    {
+                        rawBytes[r * c] = 255;
+                    }
+                }
+            }
+            image.RawBytes = rawBytes;
         }
     }
 }

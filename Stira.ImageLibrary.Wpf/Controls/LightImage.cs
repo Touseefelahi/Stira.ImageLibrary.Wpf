@@ -43,7 +43,7 @@ namespace Stira.ImageLibrary.Wpf
             {
                 SetValue(RawBytesProperty, value);
                 SourceImage.WritePixels(rectBitmap, RawBytes, WidthImage * numberOfChannels, 0);
-                Source = SourceImage;
+                imageViewer.Source = SourceImage;
             }
         }
 
@@ -68,7 +68,7 @@ namespace Stira.ImageLibrary.Wpf
             {
                 SetValue(ImagePtrProperty, value);
                 SourceImage.WritePixels(rectBitmap, ImagePtr, WidthImage * HeightImage * numberOfChannels, WidthImage * numberOfChannels);
-                Source = SourceImage;
+                imageViewer.Source = SourceImage;
             }
         }
 

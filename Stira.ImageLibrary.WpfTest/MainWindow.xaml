@@ -6,18 +6,16 @@
         xmlns:local="clr-namespace:Stira.ImageLibrary.WpfTest"
         xmlns:il="clr-namespace:Stira.ImageLibrary.Wpf;assembly=Stira.ImageLibrary.Wpf"
         mc:Ignorable="d"
-        Title="MainWindow" ResizeMode="NoResize" Height="400" Width="600">
+        Title="MainWindow"  Height="400" Width="600">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition />
             <RowDefinition Height="100" />
         </Grid.RowDefinitions>
-        <Grid ClipToBounds="True">
-            <il:LightImage x:Name="image" Margin="5,50,5,5" RawBytes="{Binding RawBytes}"
-                     Width="1024" Height="768"
-                     WidthImage="1024"
-                     HeightImage="768"
-                     IsColored="True" />
+
+        <Grid>
+            <il:LightImage x:Name="image" RawBytes="{Binding RawBytes}"  IsColored="True" />
         </Grid>
+        <Grid Grid.Row="1" Background="Gray" />
     </Grid>
 </Window>

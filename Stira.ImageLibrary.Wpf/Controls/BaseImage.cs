@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -7,45 +8,85 @@ using System.Windows.Media.Imaging;
 
 namespace Stira.ImageLibrary.Wpf
 {
-    public abstract class BaseImage : Image
+    public abstract class BaseImage : ScrollViewer
     {
         protected Int32Rect rectBitmap;
         protected int numberOfChannels = 1;
         protected WriteableBitmap SourceImage;
+        protected Image imageViewer;
         private readonly ScaleTransform scaleTransform;
-        private readonly TranslateTransform translateTransform;
         private readonly DisplayContextMenu displayContextMenu;
         private bool isFlippedVertical, isOneToOnePixel, isFlippedHorizontal;
         private Point start, origin;
 
+        private UIElement reference;
+
+        private Size baseSize;
+
         protected BaseImage()
         {
+            imageViewer = new Image();
             //Context menu
             displayContextMenu = new DisplayContextMenu();
             ContextMenu = displayContextMenu;
             ((MenuItem)ContextMenu.Items[0]).Click += OneToOnePixel;
             ((MenuItem)ContextMenu.Items[1]).Click += FlipVertical;
             ((MenuItem)ContextMenu.Items[2]).Click += FlipHorizontal;
-            ((MenuItem)ContextMenu.Items[3]).Click += DefaultScale;
+            ((MenuItem)ContextMenu.Items[3]).Click += FitOnScreen;
 
             //Mouse events zoom and pan
-            MouseWheel += BaseImage_MouseWheel;
-            MouseMove += Image_MouseMove;
-            MouseLeftButtonDown += Image_MouseLeftButtonDown;
-            MouseLeftButtonUp += Image_MouseLeftButtonUp;
+            PreviewMouseWheel += BaseImage_MouseWheel;
+            PreviewMouseMove += Image_MouseMove;
+            PreviewMouseLeftButtonDown += Image_MouseLeftButtonDown;
+            PreviewMouseLeftButtonUp += Image_MouseLeftButtonUp;
 
             //Transform
-            RenderTransformOrigin = new Point(0.5, 0.5);
-            scaleTransform = new ScaleTransform();
-            translateTransform = new TranslateTransform();
-            TransformGroup myTransformGroup = new TransformGroup();
-            myTransformGroup.Children.Add(scaleTransform);
-            myTransformGroup.Children.Add(translateTransform);
-            RenderTransform = myTransformGroup;
-            ClipToBounds = true;
+            scaleTransform = new ScaleTransform() { CenterX = 0.5, CenterY = 0.5 };
+            imageViewer.RenderTransformOrigin = new Point(0.5, 0.5);
+            imageViewer.RenderTransform = scaleTransform;
+
+            VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
+            HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden;
+            IsDeferredScrollingEnabled = true;
+
+            Content = imageViewer;
+            Loaded += BaseImage_Loaded;
+            SizeChanged += BaseImage_SizeChanged;
         }
 
-        private void DefaultScale(object sender, RoutedEventArgs e)
+        private void BaseImage_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (e.NewSize.Width > 0)
+            {
+                imageViewer.Width = e.NewSize.Width;
+            }
+            if (e.NewSize.Height > 0)
+                imageViewer.Height = e.NewSize.Height;
+        }
+
+        private void BaseImage_Loaded(object sender, RoutedEventArgs e)
+        {
+            reference = this;
+        }
+
+        private void FitOnScreen(object sender, RoutedEventArgs e)
+        {
+            RemoveTransform();
+            if (displayContextMenu.OneToOnePixel.IsChecked)
+            {
+                OneToOnePixel(null, null);
+                displayContextMenu.OneToOnePixel.IsChecked = false;
+            }
+            else
+            {
+                imageViewer.Stretch = Stretch.Uniform;
+                imageViewer.Width = this.ActualWidth;
+                imageViewer.Height = this.ActualHeight;
+            }
+            RemoveFlipping();
+        }
+
+        private void RemoveFlipping()
         {
             if (displayContextMenu.FlipVertical.IsChecked)
             {
@@ -57,52 +98,22 @@ namespace Stira.ImageLibrary.Wpf
                 FlipHorizontal(null, null);
                 displayContextMenu.FlipHorizontal.IsChecked = false;
             }
-            if (displayContextMenu.OneToOnePixel.IsChecked)
-            {
-                OneToOnePixel(null, null);
-                displayContextMenu.OneToOnePixel.IsChecked = false;
-            }
-            scaleTransform.ScaleX = 1;
-            scaleTransform.ScaleY = 1;
-            translateTransform.X = 0;
-            translateTransform.Y = 0;
         }
 
         private void Image_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            start = e.GetPosition(reference);
+            origin = new Point(HorizontalOffset, VerticalOffset);
             CaptureMouse();
-            start = e.GetPosition(this);
-            origin = new Point(translateTransform.X, translateTransform.Y);
         }
 
         private void Image_MouseMove(object sender, MouseEventArgs e)
         {
             if (IsMouseCaptured)
             {
-                if (Math.Abs(scaleTransform.ScaleX) < 0.5 ||
-                    Math.Abs(scaleTransform.ScaleY) < 0.5)
-                {
-                    return;
-                }
-
-                Vector v = start - e.GetPosition(this);
-                if (isFlippedHorizontal)
-                {
-                    translateTransform.X = origin.X + v.X;
-                }
-                else
-                {
-                    translateTransform.X = origin.X - v.X;
-                }
-
-                if (isFlippedVertical)
-                {
-                    translateTransform.Y = origin.Y + v.Y;
-                }
-                else
-                {
-                    translateTransform.Y = origin.Y - v.Y;
-                }
+                Vector v = start - e.GetPosition(reference);
+                ScrollToVerticalOffset(origin.Y + v.Y);
+                ScrollToHorizontalOffset(origin.X + v.X);
             }
         }
 
@@ -111,13 +122,9 @@ namespace Stira.ImageLibrary.Wpf
             ReleaseMouseCapture();
         }
 
-        private void BaseImage_MouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+        private void BaseImage_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            if (displayContextMenu.OneToOnePixel.IsChecked)
-            {
-                OneToOnePixel(null, null);
-                displayContextMenu.OneToOnePixel.IsChecked = false;
-            }
+            if (isOneToOnePixel) return;
             double zoom = e.Delta > 0 ? .1 : -.1;
             if (Math.Abs(scaleTransform.ScaleX + zoom) < 0.2 ||
                 Math.Abs(scaleTransform.ScaleY + zoom) < 0.2)
@@ -141,18 +148,37 @@ namespace Stira.ImageLibrary.Wpf
             {
                 scaleTransform.ScaleY += zoom;
             }
+
+            imageViewer.Width = this.ActualWidth * Math.Abs(scaleTransform.ScaleX);
+            imageViewer.Height = ActualHeight * Math.Abs(scaleTransform.ScaleY);
+
+            e.Handled = true;
         }
 
         private void FlipVertical(object sender, RoutedEventArgs e)
         {
+            //ZoomToNormal();
             isFlippedVertical = !isFlippedVertical;
             scaleTransform.ScaleY = -1 * scaleTransform.ScaleY;
         }
 
+        private void RemoveTransform()
+        {
+            scaleTransform.ScaleX = 1;
+            scaleTransform.ScaleY = 1;
+        }
+
         private void FlipHorizontal(object sender, RoutedEventArgs e)
         {
+            //ZoomToNormal();
             isFlippedHorizontal = !isFlippedHorizontal;
             scaleTransform.ScaleX = -1 * scaleTransform.ScaleX;
+        }
+
+        private void ZoomToNormal()
+        {
+            scaleTransform.ScaleY = isFlippedVertical ? -1 : 1;
+            scaleTransform.ScaleX = isFlippedHorizontal ? -1 : 1;
         }
 
         private void OneToOnePixel(object sender, RoutedEventArgs e)
@@ -160,13 +186,19 @@ namespace Stira.ImageLibrary.Wpf
             isOneToOnePixel = !isOneToOnePixel;
             if (isOneToOnePixel)
             {
-                Stretch = Stretch.None;
-                scaleTransform.ScaleY = isFlippedVertical ? -1 : 1;
-                scaleTransform.ScaleX = isFlippedHorizontal ? -1 : 1;
+                ZoomToNormal();
+                imageViewer.Stretch = Stretch.None;
+                scaleTransform.ScaleY = 1;
+                scaleTransform.ScaleX = 1;
+                imageViewer.Width = rectBitmap.Width;
+                imageViewer.Height = rectBitmap.Height;
             }
             else
             {
-                Stretch = Stretch.Uniform;
+                imageViewer.Stretch = Stretch.Uniform;
+                imageViewer.Width = this.ActualWidth;
+                imageViewer.Height = this.ActualHeight;
+                //imageViewer.Width = imageViewer.Height = double.NaN;
             }
         }
     }
