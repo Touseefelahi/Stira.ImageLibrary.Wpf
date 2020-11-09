@@ -6,7 +6,7 @@
     <Authors>Touseef</Authors>
     <Company>Stira.sa</Company>
     <Description>
-      This library have a control that can display raw bytes as image int ImageControl in WPF
+      This library have a control that can display raw bytes as image in ImageControl in WPF. It can also display Mat type from EMGU.CV (opencv)
     </Description>
     <RepositoryUrl>https://github.com/Touseefelahi/Stira.ImageLibrary.Wpf</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -15,12 +15,13 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageReleaseNotes>
+      v2.1: Gives Zoom buttons and scrollbar visibility option in context menu
       v2.0: Gives Zooming and panning feature with transform operation in context menu
       v1.0: In this release, there's an ugly way of refreshing the frame: i.e. FrameCounter++
       This must be fixed
     </PackageReleaseNotes>
     <Configurations>Debug;Release;PublishOnLocal</Configurations>
-    <Version>2.0.2</Version>
+    <Version>2.1.0</Version>
   </PropertyGroup>
 
   <Choose>
