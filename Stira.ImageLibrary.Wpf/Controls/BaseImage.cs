@@ -14,14 +14,13 @@ namespace Stira.ImageLibrary.Wpf
         protected int numberOfChannels = 1;
         protected WriteableBitmap SourceImage;
         protected Image imageViewer;
+        private const int scrollBarThickness = 20;
         private readonly ScaleTransform scaleTransform;
         private readonly DisplayContextMenu displayContextMenu;
-        private bool isFlippedVertical, isOneToOnePixel, isFlippedHorizontal;
+        private bool isFlippedVertical, isOneToOnePixel, isFlippedHorizontal, isAutoScrollOn;
         private Point start, origin;
 
         private UIElement reference;
-
-        private Size baseSize;
 
         protected BaseImage()
         {
@@ -32,7 +31,10 @@ namespace Stira.ImageLibrary.Wpf
             ((MenuItem)ContextMenu.Items[0]).Click += OneToOnePixel;
             ((MenuItem)ContextMenu.Items[1]).Click += FlipVertical;
             ((MenuItem)ContextMenu.Items[2]).Click += FlipHorizontal;
-            ((MenuItem)ContextMenu.Items[3]).Click += FitOnScreen;
+            ((MenuItem)ContextMenu.Items[3]).Click += AutoScroll;
+            ((MenuItem)ContextMenu.Items[4]).Click += ZoomIn;
+            ((MenuItem)ContextMenu.Items[5]).Click += ZoomOut;
+            ((MenuItem)ContextMenu.Items[6]).Click += FitOnScreen;
 
             //Mouse events zoom and pan
             PreviewMouseWheel += BaseImage_MouseWheel;
@@ -47,11 +49,38 @@ namespace Stira.ImageLibrary.Wpf
 
             VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
             HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden;
-            IsDeferredScrollingEnabled = true;
+            // IsDeferredScrollingEnabled = true;
 
             Content = imageViewer;
             Loaded += BaseImage_Loaded;
             SizeChanged += BaseImage_SizeChanged;
+        }
+
+        private void AutoScroll(object sender, RoutedEventArgs e)
+        {
+            isAutoScrollOn = !isAutoScrollOn;
+            if (isAutoScrollOn)
+            {
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
+            }
+            else
+            {
+                VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden;
+            }
+        }
+
+        private void ZoomOut(object sender, RoutedEventArgs e)
+        {
+            if (!isOneToOnePixel)
+                Zoom(-0.1);
+        }
+
+        private void ZoomIn(object sender, RoutedEventArgs e)
+        {
+            if (!isOneToOnePixel)
+                Zoom(0.1);
         }
 
         private void BaseImage_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -80,8 +109,8 @@ namespace Stira.ImageLibrary.Wpf
             else
             {
                 imageViewer.Stretch = Stretch.Uniform;
-                imageViewer.Width = this.ActualWidth;
-                imageViewer.Height = this.ActualHeight;
+                imageViewer.Width = ActualWidth;
+                imageViewer.Height = ActualHeight;
             }
             RemoveFlipping();
         }
@@ -103,6 +132,8 @@ namespace Stira.ImageLibrary.Wpf
         private void Image_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             start = e.GetPosition(reference);
+            //This check is to prevent the inverted scrollbar control when visible
+            if (isAutoScrollOn && (start.X > ActualWidth - scrollBarThickness || start.Y > ActualHeight - scrollBarThickness)) return;
             origin = new Point(HorizontalOffset, VerticalOffset);
             CaptureMouse();
         }
@@ -131,33 +162,36 @@ namespace Stira.ImageLibrary.Wpf
             {
                 return;
             }
+            Zoom(zoom);
+            e.Handled = true;
+        }
+
+        private void Zoom(double zoomDelta)
+        {
             if (isFlippedHorizontal)
             {
-                scaleTransform.ScaleX -= zoom;
+                scaleTransform.ScaleX -= zoomDelta;
             }
             else
             {
-                scaleTransform.ScaleX += zoom;
+                scaleTransform.ScaleX += zoomDelta;
             }
 
             if (isFlippedVertical)
             {
-                scaleTransform.ScaleY -= zoom;
+                scaleTransform.ScaleY -= zoomDelta;
             }
             else
             {
-                scaleTransform.ScaleY += zoom;
+                scaleTransform.ScaleY += zoomDelta;
             }
 
-            imageViewer.Width = this.ActualWidth * Math.Abs(scaleTransform.ScaleX);
+            imageViewer.Width = ActualWidth * Math.Abs(scaleTransform.ScaleX);
             imageViewer.Height = ActualHeight * Math.Abs(scaleTransform.ScaleY);
-
-            e.Handled = true;
         }
 
         private void FlipVertical(object sender, RoutedEventArgs e)
         {
-            //ZoomToNormal();
             isFlippedVertical = !isFlippedVertical;
             scaleTransform.ScaleY = -1 * scaleTransform.ScaleY;
         }
@@ -170,7 +204,6 @@ namespace Stira.ImageLibrary.Wpf
 
         private void FlipHorizontal(object sender, RoutedEventArgs e)
         {
-            //ZoomToNormal();
             isFlippedHorizontal = !isFlippedHorizontal;
             scaleTransform.ScaleX = -1 * scaleTransform.ScaleX;
         }
@@ -196,9 +229,8 @@ namespace Stira.ImageLibrary.Wpf
             else
             {
                 imageViewer.Stretch = Stretch.Uniform;
-                imageViewer.Width = this.ActualWidth;
-                imageViewer.Height = this.ActualHeight;
-                //imageViewer.Width = imageViewer.Height = double.NaN;
+                imageViewer.Width = ActualWidth;
+                imageViewer.Height = ActualHeight;
             }
         }
     }

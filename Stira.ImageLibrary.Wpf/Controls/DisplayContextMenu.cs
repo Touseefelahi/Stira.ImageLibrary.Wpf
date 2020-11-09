@@ -23,6 +23,24 @@ namespace Stira.ImageLibrary.Wpf
                 Header = "Flip Horizontal",
                 IsCheckable = true
             };
+
+            AutoScroll = new MenuItem
+            {
+                Header = "Auto Scrollbar",
+                IsCheckable = true,
+                ToolTip = "If enabled it will display the scrollbar if the " +
+                          "image size is bigger than the container"
+            };
+            ZoomIn = new MenuItem
+            {
+                Header = "Zoom In",
+                ToolTip = "OneToOnePixel must be off to use this feature"
+            };
+            ZoomOut = new MenuItem
+            {
+                Header = "Zoom Out",
+                ToolTip = "OneToOnePixel must be off to use this feature"
+            };
             DefaultScale = new MenuItem
             {
                 Header = "Fit On Screen"
@@ -30,12 +48,19 @@ namespace Stira.ImageLibrary.Wpf
             Items.Add(OneToOnePixel);
             Items.Add(FlipVertical);
             Items.Add(FlipHorizontal);
+            Items.Add(AutoScroll);
+            Items.Add(ZoomIn);
+            Items.Add(ZoomOut);
             Items.Add(DefaultScale);
         }
 
         public MenuItem OneToOnePixel { get; }
         public MenuItem FlipVertical { get; }
         public MenuItem FlipHorizontal { get; }
+
+        public MenuItem AutoScroll { get; }
+        public MenuItem ZoomIn { get; }
+        public MenuItem ZoomOut { get; }
         public MenuItem DefaultScale { get; }
     }
 }
