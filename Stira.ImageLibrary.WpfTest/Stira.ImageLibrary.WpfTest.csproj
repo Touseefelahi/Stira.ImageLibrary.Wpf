@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Prism.Core" Version="8.0.0.1909" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Stira.ImageLibrary.Wpf\Stira.ImageLibrary.Wpf.csproj" />
   </ItemGroup>
 </Project>
