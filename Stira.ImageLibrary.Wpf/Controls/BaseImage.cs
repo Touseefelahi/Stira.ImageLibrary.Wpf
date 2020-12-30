@@ -10,14 +10,32 @@ namespace Stira.ImageLibrary.Wpf
 {
     public abstract class BaseImage : ScrollViewer
     {
+        // Using a DependencyProperty as the backing store for MouseClickEvents. This enables
+        // animation, styling, binding, etc...
+        public static readonly DependencyProperty MouseClickEventsProperty =
+            DependencyProperty.Register("MouseClickEvents", typeof(ICommand), typeof(BaseImage), new PropertyMetadata(null));
+
+        // Using a DependencyProperty as the backing store for MouseMovementEvent. This enables
+        // animation, styling, binding, etc...
+        public static readonly DependencyProperty MouseMovementEventProperty =
+            DependencyProperty.Register("MouseMovementEvent", typeof(ICommand), typeof(BaseImage), new PropertyMetadata(null));
+
         protected Int32Rect rectBitmap;
+
         protected int numberOfChannels = 1;
+
         protected WriteableBitmap SourceImage;
+
         protected Image imageViewer;
+
         private const int scrollBarThickness = 20;
+
         private readonly ScaleTransform scaleTransform;
+
         private readonly DisplayContextMenu displayContextMenu;
+
         private bool isFlippedVertical, isOneToOnePixel, isFlippedHorizontal, isAutoScrollOn;
+
         private Point start, origin;
 
         private UIElement reference;
@@ -56,6 +74,18 @@ namespace Stira.ImageLibrary.Wpf
             SizeChanged += BaseImage_SizeChanged;
         }
 
+        public ICommand MouseMovementEvent
+        {
+            get { return (ICommand)GetValue(MouseMovementEventProperty); }
+            set { SetValue(MouseMovementEventProperty, value); }
+        }
+
+        public ICommand MouseClickEvents
+        {
+            get { return (ICommand)GetValue(MouseClickEventsProperty); }
+            set { SetValue(MouseClickEventsProperty, value); }
+        }
+
         private void AutoScroll(object sender, RoutedEventArgs e)
         {
             isAutoScrollOn = !isAutoScrollOn;
@@ -74,13 +104,17 @@ namespace Stira.ImageLibrary.Wpf
         private void ZoomOut(object sender, RoutedEventArgs e)
         {
             if (!isOneToOnePixel)
+            {
                 Zoom(-0.1);
+            }
         }
 
         private void ZoomIn(object sender, RoutedEventArgs e)
         {
             if (!isOneToOnePixel)
+            {
                 Zoom(0.1);
+            }
         }
 
         private void BaseImage_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -90,7 +124,9 @@ namespace Stira.ImageLibrary.Wpf
                 imageViewer.Width = e.NewSize.Width;
             }
             if (e.NewSize.Height > 0)
+            {
                 imageViewer.Height = e.NewSize.Height;
+            }
         }
 
         private void BaseImage_Loaded(object sender, RoutedEventArgs e)
@@ -132,8 +168,13 @@ namespace Stira.ImageLibrary.Wpf
         private void Image_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             start = e.GetPosition(reference);
+            MouseClickEvents?.Execute(new MouseArgs() { IsMouseDown = true, Position = GetPoint(e) });
             //This check is to prevent the inverted scrollbar control when visible
-            if (isAutoScrollOn && (start.X > ActualWidth - scrollBarThickness || start.Y > ActualHeight - scrollBarThickness)) return;
+            if (isAutoScrollOn && (start.X > ActualWidth - scrollBarThickness || start.Y > ActualHeight - scrollBarThickness))
+            {
+                return;
+            }
+
             origin = new Point(HorizontalOffset, VerticalOffset);
             CaptureMouse();
         }
@@ -146,16 +187,31 @@ namespace Stira.ImageLibrary.Wpf
                 ScrollToVerticalOffset(origin.Y + v.Y);
                 ScrollToHorizontalOffset(origin.X + v.X);
             }
+            MouseMovementEvent?.Execute(new MouseArgs() { IsMouseDown = IsMouseCaptured, Position = GetPoint(e) });
+        }
+
+        private Point GetPoint(MouseEventArgs e)
+        {
+            return new Point()
+            {
+                X = e.GetPosition(imageViewer).X * rectBitmap.Width / imageViewer.Width,
+                Y = e.GetPosition(imageViewer).Y * rectBitmap.Height / imageViewer.Height,
+            };
         }
 
         private void Image_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             ReleaseMouseCapture();
+            MouseClickEvents?.Execute(new MouseArgs() { IsMouseDown = false, Position = GetPoint(e) });
         }
 
         private void BaseImage_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            if (isOneToOnePixel) return;
+            if (isOneToOnePixel)
+            {
+                return;
+            }
+
             double zoom = e.Delta > 0 ? .1 : -.1;
             if (Math.Abs(scaleTransform.ScaleX + zoom) < 0.2 ||
                 Math.Abs(scaleTransform.ScaleY + zoom) < 0.2)

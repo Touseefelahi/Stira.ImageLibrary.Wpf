@@ -15,13 +15,14 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageReleaseNotes>
+      v2.2: Gives Mouse Events
       v2.1: Gives Zoom buttons and scrollbar visibility option in context menu
       v2.0: Gives Zooming and panning feature with transform operation in context menu
       v1.0: In this release, there's an ugly way of refreshing the frame: i.e. FrameCounter++
       This must be fixed
     </PackageReleaseNotes>
     <Configurations>Debug;Release;PublishOnLocal</Configurations>
-    <Version>2.1.0</Version>
+    <Version>2.2.0</Version>
   </PropertyGroup>
 
   <Choose>

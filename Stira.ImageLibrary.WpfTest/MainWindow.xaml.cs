@@ -1,5 +1,8 @@
-﻿using System;
+﻿using Prism.Commands;
+using Stira.ImageLibrary.Wpf;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -39,6 +42,24 @@ namespace Stira.ImageLibrary.WpfTest
                 }
             }
             image.RawBytes = rawBytes;
+            MouseClickCommand = new DelegateCommand<object>(MouseClicked);
+            // MouseMoveCommand = new DelegateCommand<object>(MouseMoved);
+        }
+
+        public ICommand MouseClickCommand { get; }
+
+        public DelegateCommand<object> MouseMoveCommand { get; }
+
+        private void MouseMoved(object mouse)
+        {
+            if (mouse is MouseArgs mouseArgs)
+                Trace.WriteLine($"{mouseArgs.IsMouseDown} {mouseArgs.Position}");
+        }
+
+        private void MouseClicked(object mouse)
+        {
+            if (mouse is MouseArgs mouseArgs)
+                Trace.WriteLine($"{mouseArgs.IsMouseDown} {mouseArgs.Position}");
         }
     }
 }
