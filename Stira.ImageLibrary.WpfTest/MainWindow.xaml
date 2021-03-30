@@ -24,6 +24,12 @@
                 MouseMovementEvent="{Binding MouseMoveCommand}"
                 RawBytes="{Binding RawBytes}" />
         </Grid>
-        <Grid Grid.Row="1" Background="Gray" />
+        <Grid Grid.Row="1" Background="Gray">
+            <il:ImagePlus
+                x:Name="image3"
+                Width="100"
+                Height="50"
+                Image="{Binding Image2}" />
+        </Grid>
     </Grid>
 </Window>

@@ -1,20 +1,10 @@
 ﻿using Prism.Commands;
 using Stira.ImageLibrary.Wpf;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Stira.ImageLibrary.WpfTest
 {
@@ -43,9 +33,11 @@ namespace Stira.ImageLibrary.WpfTest
             }
             image.RawBytes = rawBytes;
             MouseClickCommand = new DelegateCommand<object>(MouseClicked);
+            Image2 = new BitmapImage(new Uri(@"C:\Users\touse\Pictures\90 14 March 21 Bullet position\90M1-1.png"));
+            image3.Image = Image2;
             // MouseMoveCommand = new DelegateCommand<object>(MouseMoved);
         }
-
+        public BitmapImage Image2 { get; set; }
         public ICommand MouseClickCommand { get; }
 
         public DelegateCommand<object> MouseMoveCommand { get; }
