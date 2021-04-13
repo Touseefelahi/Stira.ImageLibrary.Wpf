@@ -15,6 +15,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageReleaseNotes>
+      v2.3: Added BitmapImage as input for ImagePlus control
       v2.2: Gives Mouse Events
       v2.1: Gives Zoom buttons and scrollbar visibility option in context menu
       v2.0: Gives Zooming and panning feature with transform operation in context menu
@@ -22,7 +23,7 @@
       This must be fixed
     </PackageReleaseNotes>
     <Configurations>Debug;Release;PublishOnLocal</Configurations>
-    <Version>2.2.0</Version>
+    <Version>2.3.1</Version>
   </PropertyGroup>
 
   <Choose>

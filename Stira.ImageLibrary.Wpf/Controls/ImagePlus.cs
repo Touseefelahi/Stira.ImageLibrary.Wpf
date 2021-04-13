@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Media.Imaging;
 
 namespace Stira.ImageLibrary.Wpf
@@ -17,9 +18,14 @@ namespace Stira.ImageLibrary.Wpf
 
         // Using a DependencyProperty as the backing store for Image.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty ImageProperty =
-            DependencyProperty.Register("Image", typeof(BitmapImage), typeof(ImagePlus), new PropertyMetadata(null));
+            DependencyProperty.Register("Image", typeof(BitmapImage), typeof(ImagePlus), new PropertyMetadata(null, propertyChanged));
 
-
-
+        private static void propertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if(d is ImagePlus imagePlus)
+            {
+                imagePlus.Image = e.NewValue as BitmapImage;
+            }
+        }
     }
 }

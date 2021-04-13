@@ -16,7 +16,8 @@ namespace Stira.ImageLibrary.WpfTest
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = this;
+            DataContext = new MainViewmodel();
+            return;
             image.WidthImage = 2048;
             image.HeightImage = 1536;
             image.IsColored = true;
