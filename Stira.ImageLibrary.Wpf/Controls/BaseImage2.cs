@@ -73,7 +73,6 @@ namespace Stira.ImageLibrary.Wpf
 
             VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
             HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden;
-            // IsDeferredScrollingEnabled = true;
 
             Content = imageViewer;
             Loaded += BaseImage_Loaded;
@@ -181,7 +180,6 @@ namespace Stira.ImageLibrary.Wpf
                 return;
             }
             origin = new Point(translateTransform.X, translateTransform.Y);
-            //origin = new Point(HorizontalOffset, VerticalOffset);
             CaptureMouse();
         }
 
@@ -195,8 +193,8 @@ namespace Stira.ImageLibrary.Wpf
             if (IsMouseCaptured)
             {
                 Vector v = start - e.GetPosition(reference);
-                //ScrollToVerticalOffset(origin.Y + v.Y); ScrollToHorizontalOffset(origin.X + v.X);
-                translateTransform.X = origin.X - v.X; translateTransform.Y = origin.Y - v.Y;
+                translateTransform.X = origin.X - v.X;
+                translateTransform.Y = origin.Y - v.Y;
             }
             MouseMovementEvent?.Execute(new MouseArgs() { IsMouseDown = IsMouseCaptured, Position = GetPoint(e) });
         }
@@ -226,17 +224,19 @@ namespace Stira.ImageLibrary.Wpf
             double zoom = e.Delta > 0 ? .1 : -.1;
             if (Math.Abs(scaleTransform.ScaleX + zoom) < 0.2 ||
                 Math.Abs(scaleTransform.ScaleY + zoom) < 0.2 ||
-                Math.Abs(scaleTransform.ScaleX + zoom) > 4 ||
-                Math.Abs(scaleTransform.ScaleY + zoom) > 4)
+                Math.Abs(scaleTransform.ScaleX + zoom) > 4.1 ||
+                Math.Abs(scaleTransform.ScaleY + zoom) > 4.1)
             {
                 return;
             }
-            Zoom(zoom);
+            Zoom(zoom, (e.GetPosition(imageViewer).X * rectBitmap.Width / imageViewer.ActualWidth) / rectBitmap.Width,
+                (e.GetPosition(imageViewer).Y * rectBitmap.Height / imageViewer.ActualHeight) / rectBitmap.Height);
             e.Handled = true;
         }
 
-        private void Zoom(double zoomDelta)
+        private void Zoom(double zoomDelta, double centerX = 0.5, double centerY = 0.5)
         {
+            imageViewer.RenderTransformOrigin = new Point(centerX, centerY);
             if (isFlippedHorizontal)
             {
                 scaleTransform.ScaleX -= zoomDelta;
@@ -254,14 +254,6 @@ namespace Stira.ImageLibrary.Wpf
             {
                 scaleTransform.ScaleY += zoomDelta;
             }
-
-            //imageViewer.Width = ActualWidth * Math.Abs(scaleTransform.ScaleX);
-            //imageViewer.Height = ActualHeight * Math.Abs(scaleTransform.ScaleY);
-
-            //this.InvalidateScrollInfo();
-            // this.Dispatcher.Invoke(() => {
-            //ScrollToRightEnd();
-            // });
         }
 
         private void FlipVertical(object sender, RoutedEventArgs e)
