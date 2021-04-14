@@ -194,8 +194,8 @@ namespace Stira.ImageLibrary.Wpf
         {
             return new Point()
             {
-                X = e.GetPosition(imageViewer).X * rectBitmap.Width / imageViewer.Width,
-                Y = e.GetPosition(imageViewer).Y * rectBitmap.Height / imageViewer.Height,
+                X = e.GetPosition(imageViewer).X * rectBitmap.Width / imageViewer.ActualWidth,
+                Y = e.GetPosition(imageViewer).Y * rectBitmap.Height / imageViewer.ActualHeight,
             };
         }
 

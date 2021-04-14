@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -31,6 +30,7 @@ namespace Stira.ImageLibrary.Wpf
         private const int scrollBarThickness = 20;
 
         private readonly ScaleTransform scaleTransform;
+        private readonly TranslateTransform translateTransform;
 
         private readonly DisplayContextMenu displayContextMenu;
 
@@ -63,11 +63,16 @@ namespace Stira.ImageLibrary.Wpf
             //Transform
             scaleTransform = new ScaleTransform() { CenterX = 0.5, CenterY = 0.5 };
             imageViewer.RenderTransformOrigin = new Point(0.5, 0.5);
-            imageViewer.RenderTransform = scaleTransform;
+
+            translateTransform = new TranslateTransform() { X = 0.5, Y = 0.5 };
+            var transformGroup = new TransformGroup();
+            transformGroup.Children.Add(scaleTransform);
+            transformGroup.Children.Add(translateTransform);
+
+            imageViewer.RenderTransform = transformGroup;
 
             VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
             HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden;
-            // IsDeferredScrollingEnabled = true;
 
             Content = imageViewer;
             Loaded += BaseImage_Loaded;
@@ -76,14 +81,14 @@ namespace Stira.ImageLibrary.Wpf
 
         public ICommand MouseMovementEvent
         {
-            get { return (ICommand)GetValue(MouseMovementEventProperty); }
-            set { SetValue(MouseMovementEventProperty, value); }
+            get => (ICommand)GetValue(MouseMovementEventProperty);
+            set => SetValue(MouseMovementEventProperty, value);
         }
 
         public ICommand MouseClickEvents
         {
-            get { return (ICommand)GetValue(MouseClickEventsProperty); }
-            set { SetValue(MouseClickEventsProperty, value); }
+            get => (ICommand)GetValue(MouseClickEventsProperty);
+            set => SetValue(MouseClickEventsProperty, value);
         }
 
         private void AutoScroll(object sender, RoutedEventArgs e)
@@ -174,18 +179,22 @@ namespace Stira.ImageLibrary.Wpf
             {
                 return;
             }
-
-            origin = new Point(HorizontalOffset, VerticalOffset);
+            origin = new Point(translateTransform.X, translateTransform.Y);
             CaptureMouse();
         }
 
+        /// <summary>
+        /// This method performs the panning
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Image_MouseMove(object sender, MouseEventArgs e)
         {
             if (IsMouseCaptured)
             {
                 Vector v = start - e.GetPosition(reference);
-                ScrollToVerticalOffset(origin.Y + v.Y);
-                ScrollToHorizontalOffset(origin.X + v.X);
+                translateTransform.X = origin.X - v.X;
+                translateTransform.Y = origin.Y - v.Y;
             }
             MouseMovementEvent?.Execute(new MouseArgs() { IsMouseDown = IsMouseCaptured, Position = GetPoint(e) });
         }
@@ -194,8 +203,8 @@ namespace Stira.ImageLibrary.Wpf
         {
             return new Point()
             {
-                X = e.GetPosition(imageViewer).X * rectBitmap.Width / imageViewer.Width,
-                Y = e.GetPosition(imageViewer).Y * rectBitmap.Height / imageViewer.Height,
+                X = e.GetPosition(imageViewer).X * rectBitmap.Width / imageViewer.ActualWidth,
+                Y = e.GetPosition(imageViewer).Y * rectBitmap.Height / imageViewer.ActualHeight,
             };
         }
 
@@ -214,16 +223,20 @@ namespace Stira.ImageLibrary.Wpf
 
             double zoom = e.Delta > 0 ? .1 : -.1;
             if (Math.Abs(scaleTransform.ScaleX + zoom) < 0.2 ||
-                Math.Abs(scaleTransform.ScaleY + zoom) < 0.2)
+                Math.Abs(scaleTransform.ScaleY + zoom) < 0.2 ||
+                Math.Abs(scaleTransform.ScaleX + zoom) > 4.1 ||
+                Math.Abs(scaleTransform.ScaleY + zoom) > 4.1)
             {
                 return;
             }
-            Zoom(zoom);
+            Zoom(zoom, (e.GetPosition(imageViewer).X * rectBitmap.Width / imageViewer.ActualWidth) / rectBitmap.Width,
+                (e.GetPosition(imageViewer).Y * rectBitmap.Height / imageViewer.ActualHeight) / rectBitmap.Height);
             e.Handled = true;
         }
 
-        private void Zoom(double zoomDelta)
+        private void Zoom(double zoomDelta, double centerX = 0.5, double centerY = 0.5)
         {
+            imageViewer.RenderTransformOrigin = new Point(centerX, centerY);
             if (isFlippedHorizontal)
             {
                 scaleTransform.ScaleX -= zoomDelta;
@@ -241,9 +254,6 @@ namespace Stira.ImageLibrary.Wpf
             {
                 scaleTransform.ScaleY += zoomDelta;
             }
-
-            imageViewer.Width = ActualWidth * Math.Abs(scaleTransform.ScaleX);
-            imageViewer.Height = ActualHeight * Math.Abs(scaleTransform.ScaleY);
         }
 
         private void FlipVertical(object sender, RoutedEventArgs e)

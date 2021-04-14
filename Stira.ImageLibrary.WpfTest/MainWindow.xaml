@@ -13,7 +13,6 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition />
-            <RowDefinition Height="100" />
         </Grid.RowDefinitions>
 
         <Grid>
@@ -24,11 +23,10 @@
                 MouseMovementEvent="{Binding MouseMoveCommand}"
                 RawBytes="{Binding RawBytes}" />
         </Grid>
-        <Grid Grid.Row="1" Background="Gray">
+        <Grid Grid.Row="0" Background="Gray">
             <il:ImagePlus
+                MouseClickEvents="{Binding MouseClickCommand}"
                 x:Name="image3"
-                Width="100"
-                Height="50"
                 Image="{Binding Image2}" />
         </Grid>
     </Grid>
