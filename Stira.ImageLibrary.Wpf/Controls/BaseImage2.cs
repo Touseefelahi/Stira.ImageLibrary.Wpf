@@ -39,7 +39,7 @@ namespace Stira.ImageLibrary.Wpf
         private Point start, origin;
 
         private UIElement reference;
-
+        private double zoomLevel = 1;
         protected BaseImage2()
         {
             imageViewer = new Image();
@@ -172,6 +172,10 @@ namespace Stira.ImageLibrary.Wpf
 
         private void Image_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            if (!(e.OriginalSource is Image image))
+            {
+                return;
+            }
             start = e.GetPosition(reference);
             MouseClickEvents?.Execute(new MouseArgs() { IsMouseDown = true, Position = GetPoint(e) });
             //This check is to prevent the inverted scrollbar control when visible
@@ -203,20 +207,27 @@ namespace Stira.ImageLibrary.Wpf
         {
             return new Point()
             {
-                X = e.GetPosition(imageViewer).X * rectBitmap.Width / imageViewer.ActualWidth,
-                Y = e.GetPosition(imageViewer).Y * rectBitmap.Height / imageViewer.ActualHeight,
+                X = e.GetPosition(imageViewer).X * (rectBitmap.Width / imageViewer.ActualWidth),
+                Y = e.GetPosition(imageViewer).Y * (rectBitmap.Height / imageViewer.ActualHeight),
             };
         }
+        bool hasMoved = false;
 
         private void Image_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             ReleaseMouseCapture();
             MouseClickEvents?.Execute(new MouseArgs() { IsMouseDown = false, Position = GetPoint(e) });
+            hasMoved = true;
         }
 
         private void BaseImage_MouseWheel(object sender, MouseWheelEventArgs e)
         {
             if (isOneToOnePixel)
+            {
+                return;
+            }
+
+            if (!(e.OriginalSource is Image image))
             {
                 return;
             }
@@ -229,14 +240,28 @@ namespace Stira.ImageLibrary.Wpf
             {
                 return;
             }
-            Zoom(zoom, (e.GetPosition(imageViewer).X * rectBitmap.Width / imageViewer.ActualWidth) / rectBitmap.Width,
-                (e.GetPosition(imageViewer).Y * rectBitmap.Height / imageViewer.ActualHeight) / rectBitmap.Height);
+
+            var x = e.GetPosition(imageViewer).X;
+
+            zoomLevel += zoom;
+            Zoom(zoom, (e.GetPosition(imageViewer).X * (imageViewer.ActualWidth / rectBitmap.Width) / rectBitmap.Width),
+                (e.GetPosition(imageViewer).Y * (imageViewer.ActualHeight / rectBitmap.Height) / rectBitmap.Height));
+            //        Zoom(zoom, (e.GetPosition(imageViewer).X * rectBitmap.Width / imageViewer.ActualWidth) / rectBitmap.Width,
+            //(e.GetPosition(imageViewer).Y * rectBitmap.Height / imageViewer.ActualHeight) / rectBitmap.Height);
             e.Handled = true;
         }
 
         private void Zoom(double zoomDelta, double centerX = 0.5, double centerY = 0.5)
         {
-            imageViewer.RenderTransformOrigin = new Point(centerX, centerY);
+            if (zoomLevel < 1)
+            {
+                imageViewer.RenderTransformOrigin = new Point(0.5, 0.5);
+            }
+            else
+            {
+                imageViewer.RenderTransformOrigin = new Point(Math.Abs(centerX), Math.Abs(centerY));
+            }
+
             if (isFlippedHorizontal)
             {
                 scaleTransform.ScaleX -= zoomDelta;
