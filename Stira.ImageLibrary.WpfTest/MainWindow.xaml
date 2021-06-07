@@ -24,10 +24,10 @@
                 RawBytes="{Binding RawBytes}" />
         </Grid>
         <Grid Grid.Row="0" Background="Gray">
-            <il:ImagePlus
-                MouseClickEvents="{Binding MouseClickCommand}"
+            <il:ImagePlus3
                 x:Name="image3"
-                Image="{Binding Image2}" />
+                Image="{Binding Image2}"
+                MouseClickEvents="{Binding MouseClickCommand}" />
         </Grid>
     </Grid>
 </Window>
