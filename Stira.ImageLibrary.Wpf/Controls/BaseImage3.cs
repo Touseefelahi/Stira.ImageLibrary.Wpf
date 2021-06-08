@@ -65,11 +65,29 @@ namespace Stira.ImageLibrary.Wpf
             PreviewMouseWheel += BaseImage3_PreviewMouseWheel;
             PreviewMouseLeftButtonDown += BaseImage3_PreviewMouseLeftButtonDown;
             MouseMove += BaseImage3_MouseMove;
+            SizeChanged += BaseImage3_SizeChanged;
             grid.Children.Add(imageViewer);
             var transformGroup = new TransformGroup();
             transformGroup.Children.Add(scaleTransform);
             grid.LayoutTransform = transformGroup;
+            grid.RenderTransformOrigin = new Point(0.5, 0.5);
+            grid.Width = ActualWidth;
+            grid.Height = ActualHeight;
             Content = grid;
+        }
+
+
+
+        private void BaseImage3_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (e.NewSize.Width > 0)
+            {
+                grid.Width = e.NewSize.Width;
+            }
+            if (e.NewSize.Height > 0)
+            {
+                grid.Height = e.NewSize.Height;
+            }
         }
 
         private void BaseImage3_MouseMove(object sender, MouseEventArgs e)
@@ -304,9 +322,8 @@ namespace Stira.ImageLibrary.Wpf
             }
             else
             {
-                imageViewer.Stretch = Stretch.Uniform;
-                imageViewer.Width = ActualWidth;
-                imageViewer.Height = ActualHeight;
+                grid.Width = ActualWidth;
+                grid.Height = ActualHeight;
             }
             RemoveFlipping();
         }

@@ -20,9 +20,6 @@ namespace Stira.ImageLibrary.Wpf
             {
                 SourceImage = value;
                 imageViewer.Source = SourceImage;
-                grid.RenderTransformOrigin = new Point(0.5, 0.5);
-                grid.Width = value.Width;
-                grid.Height = value.Height;
             }
 
         }
