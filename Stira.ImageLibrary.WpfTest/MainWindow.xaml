@@ -11,23 +11,9 @@
     Height="400"
     mc:Ignorable="d">
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition />
-        </Grid.RowDefinitions>
-
-        <Grid>
-            <il:LightImage
-                x:Name="image"
-                IsColored="True"
-                MouseClickEvents="{Binding MouseClickCommand}"
-                MouseMovementEvent="{Binding MouseMoveCommand}"
-                RawBytes="{Binding RawBytes}" />
-        </Grid>
-        <Grid Grid.Row="0" Background="Gray">
-            <il:ImagePlus3
+        <il:ImagePlus3
                 x:Name="image3"
                 Image="{Binding Image2}"
                 MouseClickEvents="{Binding MouseClickCommand}" />
-        </Grid>
     </Grid>
 </Window>

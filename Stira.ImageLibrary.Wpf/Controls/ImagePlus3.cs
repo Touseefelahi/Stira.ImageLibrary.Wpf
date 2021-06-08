@@ -24,6 +24,7 @@ namespace Stira.ImageLibrary.Wpf
                 grid.Width = value.Width;
                 grid.Height = value.Height;
             }
+
         }
 
         private  static void propertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -31,7 +32,6 @@ namespace Stira.ImageLibrary.Wpf
             if (d is ImagePlus3 imagePlus)
             {
                 imagePlus.Image = e.NewValue as BitmapImage;
-
             }
         }
     }

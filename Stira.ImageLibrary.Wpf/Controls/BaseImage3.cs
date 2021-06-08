@@ -38,18 +38,31 @@ namespace Stira.ImageLibrary.Wpf
         public Grid grid;
         public Image imageViewer;
         public ScaleTransform scaleTransform;
-         
+        private DisplayContextMenu displayContextMenu;
+
         public BaseImage3()
         {
+
+            //Context menu
+            displayContextMenu = new DisplayContextMenu();
+            ContextMenu = displayContextMenu;
+            ((MenuItem)ContextMenu.Items[0]).Click += OneToOnePixel;
+            ((MenuItem)ContextMenu.Items[1]).Click += FlipVertical;
+            ((MenuItem)ContextMenu.Items[2]).Click += FlipHorizontal;
+            ((MenuItem)ContextMenu.Items[3]).Click += AutoScroll;
+            ((MenuItem)ContextMenu.Items[4]).Click += ZoomIn;
+            ((MenuItem)ContextMenu.Items[5]).Click += ZoomOut;
+            ((MenuItem)ContextMenu.Items[6]).Click += FitOnScreen;
+
             HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden;
             VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
             grid = new Grid();
             imageViewer = new Image();
             scaleTransform = new ScaleTransform(1,1);
             ScrollChanged += BaseImage3_ScrollChanged;
-            MouseLeftButtonUp += BaseImage3_MouseLeftButtonUp; 
+            MouseLeftButtonUp += BaseImage3_MouseLeftButtonUp;
             PreviewMouseLeftButtonUp += BaseImage3_MouseLeftButtonUp;
-            PreviewMouseWheel += BaseImage3_PreviewMouseWheel; 
+            PreviewMouseWheel += BaseImage3_PreviewMouseWheel;
             PreviewMouseLeftButtonDown += BaseImage3_PreviewMouseLeftButtonDown;
             MouseMove += BaseImage3_MouseMove;
             grid.Children.Add(imageViewer);
@@ -79,7 +92,7 @@ namespace Stira.ImageLibrary.Wpf
         {
             var mousePos = e.GetPosition(this);
             if (mousePos.X <= ViewportWidth && mousePos.Y < ViewportHeight)
-            {   
+            {
                 Cursor = Cursors.SizeAll;
                 lastDragPoint = mousePos;
                 Mouse.Capture(this);
@@ -88,6 +101,16 @@ namespace Stira.ImageLibrary.Wpf
 
         private void BaseImage3_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
+            if (isOneToOnePixel)
+            {
+                return;
+            }
+
+            if (e.OriginalSource.GetType() != typeof(Image))
+            {
+                return;
+            }
+
             lastMousePositionOnTarget = Mouse.GetPosition(grid);
 
             if (e.Delta != 0)
@@ -167,5 +190,125 @@ namespace Stira.ImageLibrary.Wpf
             lastDragPoint = null;
         }
 
+        private bool isFlippedVertical, isOneToOnePixel, isFlippedHorizontal, isAutoScrollOn;
+
+        private void FlipVertical(object sender, RoutedEventArgs e)
+        {
+            isFlippedVertical = !isFlippedVertical;
+            scaleTransform.ScaleY = -1 * scaleTransform.ScaleY;
+        }
+
+        private void RemoveTransform()
+        {
+            scaleTransform.ScaleX = 1;
+            scaleTransform.ScaleY = 1;
+        }
+
+        private void FlipHorizontal(object sender, RoutedEventArgs e)
+        {
+            isFlippedHorizontal = !isFlippedHorizontal;
+            scaleTransform.ScaleX = -1 * scaleTransform.ScaleX;
+        }
+
+        private void ZoomToNormal()
+        {
+            scaleTransform.ScaleY = isFlippedVertical ? -1 : 1;
+            scaleTransform.ScaleX = isFlippedHorizontal ? -1 : 1;
+        }
+
+        private void OneToOnePixel(object sender, RoutedEventArgs e)
+        {
+            isOneToOnePixel = !isOneToOnePixel;
+            if (isOneToOnePixel)
+            {
+                ZoomToNormal();
+                imageViewer.Stretch = Stretch.None;
+                scaleTransform.ScaleY = 1;
+                scaleTransform.ScaleX = 1;
+                imageViewer.Width = grid.Width;
+                imageViewer.Height = grid.Height;
+            }
+            else
+            {
+                imageViewer.Stretch = Stretch.Uniform;
+                imageViewer.Width = ActualWidth;
+                imageViewer.Height = ActualHeight;
+            }
+        }
+
+        private void AutoScroll(object sender, RoutedEventArgs e)
+        {
+            isAutoScrollOn = !isAutoScrollOn;
+            if (isAutoScrollOn)
+            {
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
+            }
+            else
+            {
+                VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden;
+            }
+        }
+
+        private void RemoveFlipping()
+        {
+            if (displayContextMenu.FlipVertical.IsChecked)
+            {
+                FlipVertical(null, null);
+                displayContextMenu.FlipVertical.IsChecked = false;
+            }
+            if (displayContextMenu.FlipHorizontal.IsChecked)
+            {
+                FlipHorizontal(null, null);
+                displayContextMenu.FlipHorizontal.IsChecked = false;
+            }
+        }
+
+
+        private void ZoomOut(object sender, RoutedEventArgs e)
+        {
+            if (!isOneToOnePixel)
+            {
+                Zoom(-0.1);
+            }
+        }
+
+        private void Zoom(double v)
+        {
+            lastMousePositionOnTarget = Mouse.GetPosition(grid);
+
+            scaleTransform.ScaleX += v;
+            scaleTransform.ScaleY += v;
+
+            var centerOfViewport = new Point(ViewportWidth / 2,
+                             ViewportHeight / 2);
+            lastCenterPositionOnTarget = TranslatePoint(centerOfViewport, grid);
+
+        }
+
+        private void ZoomIn(object sender, RoutedEventArgs e)
+        {
+            if (!isOneToOnePixel)
+            {
+                Zoom(0.1);
+            }
+        }
+        private void FitOnScreen(object sender, RoutedEventArgs e)
+        {
+            RemoveTransform();
+            if (displayContextMenu.OneToOnePixel.IsChecked)
+            {
+                OneToOnePixel(null, null);
+                displayContextMenu.OneToOnePixel.IsChecked = false;
+            }
+            else
+            {
+                imageViewer.Stretch = Stretch.Uniform;
+                imageViewer.Width = ActualWidth;
+                imageViewer.Height = ActualHeight;
+            }
+            RemoveFlipping();
+        }
     }
 }
