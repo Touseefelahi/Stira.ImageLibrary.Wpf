@@ -14,7 +14,7 @@ namespace Stira.ImageLibrary.WpfTest
         public MainViewmodel()
         {
             MouseClickCommand = new DelegateCommand<object>(MouseClicked);
-            Image2 = new BitmapImage(new Uri(@"C:\Users\f.fagihi\Videos\Captures\Test.jpg"));
+            Image2 = new BitmapImage(new Uri(@"C:\Users\Touseef\Pictures\25 14 March 21 Bullet position\25M1-1.mp4.00_06_26_17.Still001.png"));
             RaisePropertyChanged(nameof(Image2));
         }
 
