@@ -4,20 +4,20 @@ using System.Windows.Media.Imaging;
 
 namespace Stira.ImageLibrary.Wpf
 {
-    public class ImagePlus : BaseImage2
+    public class ImagePlus : BaseImage
     {
         // Using a DependencyProperty as the backing store for Image. This enables animation,
         // styling, binding, etc...
         public static readonly DependencyProperty ImageProperty =
-            DependencyProperty.Register("Image", typeof(BitmapImage), typeof(ImagePlus), new PropertyMetadata(null, propertyChanged));
+            DependencyProperty.Register("Image", typeof(WriteableBitmap), typeof(ImagePlus), new PropertyMetadata(null, propertyChanged));
 
-        public BitmapImage Image
+        public WriteableBitmap Image
         {
             get { return SourceImage; }
             set
             {
                 SourceImage = value;
-                imageViewer.Source = SourceImage;
+                ImageViewer.Source = SourceImage;
             }
         }
 
@@ -25,8 +25,8 @@ namespace Stira.ImageLibrary.Wpf
         {
             if (d is ImagePlus imagePlus)
             {
-                imagePlus.Image = e.NewValue as BitmapImage;
-                imagePlus.rectBitmap = new Int32Rect(0, 0, (int)imagePlus.Image.Width, (int)imagePlus.Image.Height);
+                imagePlus.Image = e.NewValue as WriteableBitmap;
+                imagePlus.RectBitmap = new Int32Rect(0, 0, (int)imagePlus.Image.Width, (int)imagePlus.Image.Height);
             }
         }
     }

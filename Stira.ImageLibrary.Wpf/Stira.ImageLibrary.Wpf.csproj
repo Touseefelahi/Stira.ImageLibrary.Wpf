@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <Authors>Touseef</Authors>
     <Company>Stira.sa</Company>
@@ -15,6 +15,9 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageReleaseNotes>
+      v3.1: Mouse Release event added
+      v3.0: Version Bump .net core v3.1 to 5
+      v2.6: Removed old Base Images - and fix Mouse events
       v2.5: Proper Panning and Zooming for ImagePlus control
       v2.4: Proper Panning and Zooming for ImagePlus control
       v2.3: Added BitmapImage as input for ImagePlus control
@@ -25,7 +28,7 @@
       This must be fixed
     </PackageReleaseNotes>
     <Configurations>Debug;Release;PublishOnLocal</Configurations>
-    <Version>2.5</Version>
+    <Version>3.1</Version>
   </PropertyGroup>
 
   <Choose>

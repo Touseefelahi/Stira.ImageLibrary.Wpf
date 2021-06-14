@@ -11,9 +11,10 @@
     Height="400"
     mc:Ignorable="d">
     <Grid>
-        <il:ImagePlus3
-                x:Name="image3"
-                Image="{Binding Image2}"
-                MouseClickEvents="{Binding MouseClickCommand}" />
+        <il:ImagePlus
+            x:Name="image3"
+            Image="{Binding Image2}"
+            MouseClickEvents="{Binding MouseClickCommand}"
+            MouseMovementEvent="{Binding MouseMovedCommand}" />
     </Grid>
 </Window>

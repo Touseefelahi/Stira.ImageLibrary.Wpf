@@ -1,7 +1,6 @@
 ﻿using Emgu.CV;
 using System.Collections.Generic;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -45,15 +44,15 @@ namespace Stira.ImageLibrary.Wpf
 
         private void ShowImage()
         {
-            if (Image.Width != rectBitmap.Width || Image.Height != rectBitmap.Height || numberOfChannels != Image.NumberOfChannels)
+            if (Image.Width != RectBitmap.Width || Image.Height != RectBitmap.Height || NumberOfChannels != Image.NumberOfChannels)
             {
                 SetupImage();
             }
-            SourceImage.WritePixels(rectBitmap,
+            SourceImage.WritePixels(RectBitmap,
                 Image.DataPointer, //Buffer
                 Image.Width * Image.NumberOfChannels * Image.Height, //Total buffer size
                 Image.Width * Image.NumberOfChannels); //Stride
-            imageViewer.Source = SourceImage;
+            ImageViewer.Source = SourceImage;
         }
 
         private void SetupImage()
@@ -61,10 +60,10 @@ namespace Stira.ImageLibrary.Wpf
             if (Image.Width != 0 && Image.Height != 0)
             {
                 const double dpi = 96;
-                rectBitmap = new Int32Rect(0, 0, Image.Width, Image.Height);
+                RectBitmap = new Int32Rect(0, 0, Image.Width, Image.Height);
                 List<Color> colors = new List<Color> { Colors.Gray };
                 BitmapPalette myPalette;
-                numberOfChannels = Image.NumberOfChannels;
+                NumberOfChannels = Image.NumberOfChannels;
                 PixelFormat format = PixelFormats.Gray8;
                 if (Image.NumberOfChannels == 3)
                 {

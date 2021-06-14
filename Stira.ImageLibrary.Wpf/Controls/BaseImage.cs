@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -8,41 +7,36 @@ using System.Windows.Media.Imaging;
 
 namespace Stira.ImageLibrary.Wpf
 {
-    public abstract class BaseImage : ScrollViewer
+    public abstract class BaseImage : ScrollViewer, IBaseImage
     {
-        // Using a DependencyProperty as the backing store for MouseClickEvents. This enables
-        // animation, styling, binding, etc...
+        /// <summary>
+        /// Using a DependencyProperty as the backing store for MouseClickEvents. This enables
+        /// animation, styling, binding, etc...
+        /// </summary>
         public static readonly DependencyProperty MouseClickEventsProperty =
             DependencyProperty.Register("MouseClickEvents", typeof(ICommand), typeof(BaseImage), new PropertyMetadata(null));
 
-        // Using a DependencyProperty as the backing store for MouseMovementEvent. This enables
-        // animation, styling, binding, etc...
+        /// <summary>
+        /// Using a DependencyProperty as the backing store for MouseMovementEvent. This enables
+        /// animation, styling, binding, etc...
+        /// </summary>
         public static readonly DependencyProperty MouseMovementEventProperty =
             DependencyProperty.Register("MouseMovementEvent", typeof(ICommand), typeof(BaseImage), new PropertyMetadata(null));
 
-        protected Int32Rect rectBitmap;
+        public Grid grid;
 
-        protected int numberOfChannels = 1;
-
-        protected WriteableBitmap SourceImage;
-
-        protected Image imageViewer;
-
-        private const int scrollBarThickness = 20;
-
-        private readonly ScaleTransform scaleTransform;
+        public ScaleTransform scaleTransform;
 
         private readonly DisplayContextMenu displayContextMenu;
+        private Point? lastCenterPositionOnTarget;
 
+        private Point? lastMousePositionOnTarget;
+
+        private Point? lastDragPoint;
         private bool isFlippedVertical, isOneToOnePixel, isFlippedHorizontal, isAutoScrollOn;
-
-        private Point start, origin;
-
-        private UIElement reference;
 
         protected BaseImage()
         {
-            imageViewer = new Image();
             //Context menu
             displayContextMenu = new DisplayContextMenu();
             ContextMenu = displayContextMenu;
@@ -54,196 +48,190 @@ namespace Stira.ImageLibrary.Wpf
             ((MenuItem)ContextMenu.Items[5]).Click += ZoomOut;
             ((MenuItem)ContextMenu.Items[6]).Click += FitOnScreen;
 
-            //Mouse events zoom and pan
-            PreviewMouseWheel += BaseImage_MouseWheel;
-            PreviewMouseMove += Image_MouseMove;
-            PreviewMouseLeftButtonDown += Image_MouseLeftButtonDown;
-            PreviewMouseLeftButtonUp += Image_MouseLeftButtonUp;
-
-            //Transform
-            scaleTransform = new ScaleTransform() { CenterX = 0.5, CenterY = 0.5 };
-            imageViewer.RenderTransformOrigin = new Point(0.5, 0.5);
-            imageViewer.RenderTransform = scaleTransform;
-
-            VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
             HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden;
-            // IsDeferredScrollingEnabled = true;
-
-            Content = imageViewer;
-            Loaded += BaseImage_Loaded;
-            SizeChanged += BaseImage_SizeChanged;
+            VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
+            grid = new Grid();
+            ImageViewer = new Image();
+            scaleTransform = new ScaleTransform(1, 1);
+            ScrollChanged += BaseImage3_ScrollChanged;
+            PreviewMouseLeftButtonUp += BaseImage3_MouseLeftButtonUp;
+            PreviewMouseWheel += BaseImage3_PreviewMouseWheel;
+            PreviewMouseLeftButtonDown += BaseImage3_PreviewMouseLeftButtonDown;
+            MouseMove += BaseImage3_MouseMove;
+            SizeChanged += BaseImage3_SizeChanged;
+            grid.Children.Add(ImageViewer);
+            TransformGroup transformGroup = new();
+            transformGroup.Children.Add(scaleTransform);
+            grid.LayoutTransform = transformGroup;
+            grid.RenderTransformOrigin = new Point(0.5, 0.5);
+            grid.Width = ActualWidth;
+            grid.Height = ActualHeight;
+            Content = grid;
         }
 
         public ICommand MouseMovementEvent
         {
-            get { return (ICommand)GetValue(MouseMovementEventProperty); }
-            set { SetValue(MouseMovementEventProperty, value); }
+            get => (ICommand)GetValue(MouseMovementEventProperty);
+            set => SetValue(MouseMovementEventProperty, value);
         }
 
         public ICommand MouseClickEvents
         {
-            get { return (ICommand)GetValue(MouseClickEventsProperty); }
-            set { SetValue(MouseClickEventsProperty, value); }
+            get => (ICommand)GetValue(MouseClickEventsProperty);
+            set => SetValue(MouseClickEventsProperty, value);
         }
 
-        private void AutoScroll(object sender, RoutedEventArgs e)
-        {
-            isAutoScrollOn = !isAutoScrollOn;
-            if (isAutoScrollOn)
-            {
-                VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
-                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
-            }
-            else
-            {
-                VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
-                HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden;
-            }
-        }
+        public Int32Rect RectBitmap { get; protected set; }
+        public int NumberOfChannels { get; protected set; } = 1;
+        public WriteableBitmap SourceImage { get; protected set; }
+        public Image ImageViewer { get; protected set; }
 
-        private void ZoomOut(object sender, RoutedEventArgs e)
-        {
-            if (!isOneToOnePixel)
-            {
-                Zoom(-0.1);
-            }
-        }
-
-        private void ZoomIn(object sender, RoutedEventArgs e)
-        {
-            if (!isOneToOnePixel)
-            {
-                Zoom(0.1);
-            }
-        }
-
-        private void BaseImage_SizeChanged(object sender, SizeChangedEventArgs e)
+        private void BaseImage3_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             if (e.NewSize.Width > 0)
             {
-                imageViewer.Width = e.NewSize.Width;
+                grid.Width = e.NewSize.Width;
             }
             if (e.NewSize.Height > 0)
             {
-                imageViewer.Height = e.NewSize.Height;
+                grid.Height = e.NewSize.Height;
             }
         }
 
-        private void BaseImage_Loaded(object sender, RoutedEventArgs e)
+        private void BaseImage3_MouseMove(object sender, MouseEventArgs e)
         {
-            reference = this;
-        }
+            if (lastDragPoint.HasValue)
+            {
+                Point posNow = e.GetPosition(this);
 
-        private void FitOnScreen(object sender, RoutedEventArgs e)
-        {
-            RemoveTransform();
-            if (displayContextMenu.OneToOnePixel.IsChecked)
-            {
-                OneToOnePixel(null, null);
-                displayContextMenu.OneToOnePixel.IsChecked = false;
-            }
-            else
-            {
-                imageViewer.Stretch = Stretch.Uniform;
-                imageViewer.Width = ActualWidth;
-                imageViewer.Height = ActualHeight;
-            }
-            RemoveFlipping();
-        }
+                double dX = posNow.X - lastDragPoint.Value.X;
+                double dY = posNow.Y - lastDragPoint.Value.Y;
 
-        private void RemoveFlipping()
-        {
-            if (displayContextMenu.FlipVertical.IsChecked)
-            {
-                FlipVertical(null, null);
-                displayContextMenu.FlipVertical.IsChecked = false;
-            }
-            if (displayContextMenu.FlipHorizontal.IsChecked)
-            {
-                FlipHorizontal(null, null);
-                displayContextMenu.FlipHorizontal.IsChecked = false;
-            }
-        }
+                lastDragPoint = posNow;
 
-        private void Image_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            start = e.GetPosition(reference);
-            MouseClickEvents?.Execute(new MouseArgs() { IsMouseDown = true, Position = GetPoint(e) });
-            //This check is to prevent the inverted scrollbar control when visible
-            if (isAutoScrollOn && (start.X > ActualWidth - scrollBarThickness || start.Y > ActualHeight - scrollBarThickness))
-            {
-                return;
-            }
-
-            origin = new Point(HorizontalOffset, VerticalOffset);
-            CaptureMouse();
-        }
-
-        private void Image_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (IsMouseCaptured)
-            {
-                Vector v = start - e.GetPosition(reference);
-                ScrollToVerticalOffset(origin.Y + v.Y);
-                ScrollToHorizontalOffset(origin.X + v.X);
+                ScrollToHorizontalOffset(HorizontalOffset - dX);
+                ScrollToVerticalOffset(VerticalOffset - dY);
             }
             MouseMovementEvent?.Execute(new MouseArgs() { IsMouseDown = IsMouseCaptured, Position = GetPoint(e) });
         }
 
-        private Point GetPoint(MouseEventArgs e)
+        private void BaseImage3_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            return new Point()
+            Point mousePos = e.GetPosition(this);
+            if (mousePos.X <= ViewportWidth && mousePos.Y < ViewportHeight)
             {
-                X = e.GetPosition(imageViewer).X * rectBitmap.Width / imageViewer.ActualWidth,
-                Y = e.GetPosition(imageViewer).Y * rectBitmap.Height / imageViewer.ActualHeight,
-            };
+                Cursor = Cursors.SizeAll;
+                lastDragPoint = mousePos;
+                Mouse.Capture(this);
+            }
+            MouseClickEvents?.Execute(new MouseArgs() { IsMouseDown = true, Position = GetPoint(e) });
         }
 
-        private void Image_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            ReleaseMouseCapture();
-            MouseClickEvents?.Execute(new MouseArgs() { IsMouseDown = false, Position = GetPoint(e) });
-        }
-
-        private void BaseImage_MouseWheel(object sender, MouseWheelEventArgs e)
+        private void BaseImage3_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
             if (isOneToOnePixel)
             {
                 return;
             }
 
-            double zoom = e.Delta > 0 ? .1 : -.1;
-            if (Math.Abs(scaleTransform.ScaleX + zoom) < 0.2 ||
-                Math.Abs(scaleTransform.ScaleY + zoom) < 0.2)
+            if (e.OriginalSource.GetType() != typeof(Image))
             {
                 return;
             }
-            Zoom(zoom);
+
+            lastMousePositionOnTarget = Mouse.GetPosition(grid);
+
+            if (e.Delta != 0)
+            {
+                if (e.Delta > 0)
+                {
+                    scaleTransform.ScaleX++;
+                    scaleTransform.ScaleY++;
+                }
+                if (e.Delta < 0 && scaleTransform.ScaleX > 1)
+                {
+                    scaleTransform.ScaleX--;
+                    scaleTransform.ScaleY--;
+                }
+                Point centerOfViewport = new(ViewportWidth / 2,
+                                 ViewportHeight / 2);
+                lastCenterPositionOnTarget = TranslatePoint(centerOfViewport, grid);
+            }
             e.Handled = true;
         }
 
-        private void Zoom(double zoomDelta)
+        private bool IsOutOfImage()
         {
-            if (isFlippedHorizontal)
+            Point point = new()
             {
-                scaleTransform.ScaleX -= zoomDelta;
-            }
-            else
-            {
-                scaleTransform.ScaleX += zoomDelta;
-            }
+                X = Mouse.GetPosition(ImageViewer).X * RectBitmap.Width / ImageViewer.ActualWidth,
+                Y = Mouse.GetPosition(ImageViewer).Y * RectBitmap.Height / ImageViewer.ActualHeight,
+            };
+            return point.X > RectBitmap.Width || point.X < 0 || point.Y > RectBitmap.Height || RectBitmap.Height < 0;
+        }
 
-            if (isFlippedVertical)
+        private Point GetPoint(MouseEventArgs e)
+        {
+            return new Point()
             {
-                scaleTransform.ScaleY -= zoomDelta;
-            }
-            else
-            {
-                scaleTransform.ScaleY += zoomDelta;
-            }
+                X = e.GetPosition(ImageViewer).X * RectBitmap.Width / ImageViewer.ActualWidth,
+                Y = e.GetPosition(ImageViewer).Y * RectBitmap.Height / ImageViewer.ActualHeight,
+            };
+        }
 
-            imageViewer.Width = ActualWidth * Math.Abs(scaleTransform.ScaleX);
-            imageViewer.Height = ActualHeight * Math.Abs(scaleTransform.ScaleY);
+        private void BaseImage3_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            if (e.ExtentHeightChange != 0 || e.ExtentWidthChange != 0)
+            {
+                Point? targetBefore = null;
+                Point? targetNow = null;
+                if (!lastMousePositionOnTarget.HasValue)
+                {
+                    if (lastCenterPositionOnTarget.HasValue)
+                    {
+                        Point centerOfViewport = new(ViewportWidth / 2, ViewportHeight / 2);
+                        Point centerOfTargetNow = TranslatePoint(centerOfViewport, grid);
+
+                        targetBefore = lastCenterPositionOnTarget;
+                        targetNow = centerOfTargetNow;
+                    }
+                }
+                else
+                {
+                    targetBefore = lastMousePositionOnTarget;
+                    targetNow = Mouse.GetPosition(grid);
+
+                    lastMousePositionOnTarget = null;
+                }
+
+                if (targetBefore.HasValue)
+                {
+                    double dXInTargetPixels = targetNow.Value.X - targetBefore.Value.X;
+                    double dYInTargetPixels = targetNow.Value.Y - targetBefore.Value.Y;
+
+                    double multiplicatorX = e.ExtentWidth / grid.Width;
+                    double multiplicatorY = e.ExtentHeight / grid.Height;
+
+                    double newOffsetX = HorizontalOffset - (dXInTargetPixels * multiplicatorX);
+                    double newOffsetY = VerticalOffset - (dYInTargetPixels * multiplicatorY);
+
+                    if (double.IsNaN(newOffsetX) || double.IsNaN(newOffsetY))
+                    {
+                        return;
+                    }
+
+                    ScrollToHorizontalOffset(newOffsetX);
+                    ScrollToVerticalOffset(newOffsetY);
+                }
+            }
+        }
+
+        private void BaseImage3_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            Cursor = Cursors.Arrow;
+            ReleaseMouseCapture();
+            lastDragPoint = null;
+            MouseClickEvents?.Execute(new MouseArgs() { IsMouseDown = false, Position = GetPoint(e) });
         }
 
         private void FlipVertical(object sender, RoutedEventArgs e)
@@ -276,18 +264,90 @@ namespace Stira.ImageLibrary.Wpf
             if (isOneToOnePixel)
             {
                 ZoomToNormal();
-                imageViewer.Stretch = Stretch.None;
+                ImageViewer.Stretch = Stretch.None;
                 scaleTransform.ScaleY = 1;
                 scaleTransform.ScaleX = 1;
-                imageViewer.Width = rectBitmap.Width;
-                imageViewer.Height = rectBitmap.Height;
+                ImageViewer.Width = grid.Width;
+                ImageViewer.Height = grid.Height;
             }
             else
             {
-                imageViewer.Stretch = Stretch.Uniform;
-                imageViewer.Width = ActualWidth;
-                imageViewer.Height = ActualHeight;
+                ImageViewer.Stretch = Stretch.Uniform;
+                ImageViewer.Width = ActualWidth;
+                ImageViewer.Height = ActualHeight;
             }
+        }
+
+        private void AutoScroll(object sender, RoutedEventArgs e)
+        {
+            isAutoScrollOn = !isAutoScrollOn;
+            if (isAutoScrollOn)
+            {
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
+            }
+            else
+            {
+                VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden;
+            }
+        }
+
+        private void RemoveFlipping()
+        {
+            if (displayContextMenu.FlipVertical.IsChecked)
+            {
+                FlipVertical(null, null);
+                displayContextMenu.FlipVertical.IsChecked = false;
+            }
+            if (displayContextMenu.FlipHorizontal.IsChecked)
+            {
+                FlipHorizontal(null, null);
+                displayContextMenu.FlipHorizontal.IsChecked = false;
+            }
+        }
+
+        private void ZoomOut(object sender, RoutedEventArgs e)
+        {
+            if (!isOneToOnePixel)
+            {
+                Zoom(-0.1);
+            }
+        }
+
+        private void Zoom(double v)
+        {
+            lastMousePositionOnTarget = Mouse.GetPosition(grid);
+
+            scaleTransform.ScaleX += v;
+            scaleTransform.ScaleY += v;
+
+            Point centerOfViewport = new(ViewportWidth / 2, ViewportHeight / 2);
+            lastCenterPositionOnTarget = TranslatePoint(centerOfViewport, grid);
+        }
+
+        private void ZoomIn(object sender, RoutedEventArgs e)
+        {
+            if (!isOneToOnePixel)
+            {
+                Zoom(0.1);
+            }
+        }
+
+        private void FitOnScreen(object sender, RoutedEventArgs e)
+        {
+            RemoveTransform();
+            if (displayContextMenu.OneToOnePixel.IsChecked)
+            {
+                OneToOnePixel(null, null);
+                displayContextMenu.OneToOnePixel.IsChecked = false;
+            }
+            else
+            {
+                grid.Width = ActualWidth;
+                grid.Height = ActualHeight;
+            }
+            RemoveFlipping();
         }
     }
 }

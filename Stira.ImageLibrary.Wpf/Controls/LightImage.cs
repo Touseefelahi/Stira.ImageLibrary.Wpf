@@ -42,8 +42,8 @@ namespace Stira.ImageLibrary.Wpf
             set
             {
                 SetValue(RawBytesProperty, value);
-                SourceImage.WritePixels(rectBitmap, RawBytes, WidthImage * numberOfChannels, 0);
-                imageViewer.Source = SourceImage;
+                SourceImage.WritePixels(RectBitmap, RawBytes, WidthImage * NumberOfChannels, 0);
+                ImageViewer.Source = SourceImage;
             }
         }
 
@@ -55,7 +55,7 @@ namespace Stira.ImageLibrary.Wpf
                 if (value != IsColored)
                 {
                     SetValue(IsColoredProperty, value);
-                    numberOfChannels = IsColored ? 3 : 1;
+                    NumberOfChannels = IsColored ? 3 : 1;
                     SetupImage();
                 }
             }
@@ -67,8 +67,8 @@ namespace Stira.ImageLibrary.Wpf
             set
             {
                 SetValue(ImagePtrProperty, value);
-                SourceImage.WritePixels(rectBitmap, ImagePtr, WidthImage * HeightImage * numberOfChannels, WidthImage * numberOfChannels);
-                imageViewer.Source = SourceImage;
+                SourceImage.WritePixels(RectBitmap, ImagePtr, WidthImage * HeightImage * NumberOfChannels, WidthImage * NumberOfChannels);
+                ImageViewer.Source = SourceImage;
             }
         }
 
@@ -97,11 +97,11 @@ namespace Stira.ImageLibrary.Wpf
             if (Width != 0 && HeightImage != 0)
             {
                 const double dpi = 96;
-                rectBitmap = new Int32Rect(0, 0, WidthImage, HeightImage);
+                RectBitmap = new Int32Rect(0, 0, WidthImage, HeightImage);
                 List<Color> colors = new List<Color> { Colors.Gray };
                 BitmapPalette myPalette;
                 PixelFormat format = PixelFormats.Gray8;
-                if (numberOfChannels == 3)
+                if (NumberOfChannels == 3)
                 {
                     colors = new List<Color> { Colors.Red, Colors.Green, Colors.Blue };
                     format = PixelFormats.Bgr24;
