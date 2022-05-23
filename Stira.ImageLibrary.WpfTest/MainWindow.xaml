@@ -16,5 +16,16 @@
             Image="{Binding Image2}"
             MouseClickEvents="{Binding MouseClickCommand}"
             MouseMovementEvent="{Binding MouseMovedCommand}" />
+        <il:LightImage
+            x:Name="image"
+            Width="640"
+            Height="480"
+            Background="Gray"
+            FrameCounter="{Binding FrameCounter}"
+            HeightImage="480"
+            MouseClickEvents="{Binding MouseClickCommand}"
+            MouseMovementEvent="{Binding MouseMovedCommand}"
+            RawBytes="{Binding RawBytes}"
+            WidthImage="640" />
     </Grid>
 </Window>

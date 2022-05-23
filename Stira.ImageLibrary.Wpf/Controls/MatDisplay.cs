@@ -22,16 +22,16 @@ namespace Stira.ImageLibrary.Wpf
         public static readonly DependencyProperty FrameCounterProperty =
             DependencyProperty.Register("FrameCounter", typeof(int), typeof(MatDisplay), new PropertyMetadata(0, MatUpdated));
 
-        public Mat Image
-        {
-            get => (Mat)GetValue(ImageProperty);
-            set => SetValue(ImageProperty, value);
-        }
-
         public int FrameCounter
         {
             get => (int)GetValue(FrameCounterProperty);
             set => SetValue(FrameCounterProperty, value);
+        }
+
+        public Mat Image
+        {
+            get => (Mat)GetValue(ImageProperty);
+            set => SetValue(ImageProperty, value);
         }
 
         private static void MatUpdated(DependencyObject d, DependencyPropertyChangedEventArgs e)

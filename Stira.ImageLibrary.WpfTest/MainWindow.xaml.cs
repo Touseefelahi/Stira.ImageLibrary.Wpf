@@ -15,10 +15,10 @@ namespace Stira.ImageLibrary.WpfTest
     {
         public MainWindow()
         {
-            InitializeComponent();
             DataContext = new MainViewmodel();
-            return;       
+            InitializeComponent();
         }
+
         public BitmapImage Image2 { get; set; }
         public ICommand MouseClickCommand { get; }
 

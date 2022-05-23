@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
   <PropertyGroup>
-    <TargetFramework>net5.0-windows</TargetFramework>
+    <TargetFramework>net6.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <Authors>Touseef</Authors>
     <Company>Stira.sa</Company>
@@ -15,20 +15,22 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageReleaseNotes>
-      v3.1: Mouse Release event added
-      v3.0: Version Bump .net core v3.1 to 5
-      v2.6: Removed old Base Images - and fix Mouse events
-      v2.5: Proper Panning and Zooming for ImagePlus control
-      v2.4: Proper Panning and Zooming for ImagePlus control
-      v2.3: Added BitmapImage as input for ImagePlus control
-      v2.2: Gives Mouse Events
-      v2.1: Gives Zoom buttons and scrollbar visibility option in context menu
-      v2.0: Gives Zooming and panning feature with transform operation in context menu
-      v1.0: In this release, there's an ugly way of refreshing the frame: i.e. FrameCounter++
-      This must be fixed
-    </PackageReleaseNotes>
+		v3.2: Fix frame update in LightImage UI control using same FrameCounter increment
+		v3.1: Mouse Release event added
+		v3.0: Version Bump .net core v3.1 to 5
+		v2.6: Removed old Base Images - and fix Mouse events
+		v2.5: Proper Panning and Zooming for ImagePlus control
+		v2.4: Proper Panning and Zooming for ImagePlus control
+		v2.3: Added BitmapImage as input for ImagePlus control
+		v2.2: Gives Mouse Events
+		v2.1: Gives Zoom buttons and scrollbar visibility option in context menu
+		v2.0: Gives Zooming and panning feature with transform operation in context menu
+		v1.0: In this release, there's an ugly way of refreshing the frame: i.e. FrameCounter++
+		This must be fixed
+	</PackageReleaseNotes>
     <Configurations>Debug;Release;PublishOnLocal</Configurations>
-    <Version>3.1</Version>
+    <Version>3.2</Version>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <Choose>
