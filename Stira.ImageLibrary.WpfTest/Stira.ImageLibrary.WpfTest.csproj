@@ -2,15 +2,33 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Prism.Core" Version="8.0.0.1909" />
+    <PackageReference Include="Prism.Core" Version="8.1.97" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Onvif\RtspPlayerControl\RtspPlayerControl.csproj" />
     <ProjectReference Include="..\Stira.ImageLibrary.Wpf\Stira.ImageLibrary.Wpf.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="libffmpeghelper.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <Target Name="CopyDataFiles" AfterTargets="Build">
+    <ItemGroup>
+      <FFmpegFiles Condition=" '$(Platform)' == 'x86'" Include="$(ProjectDir)x86\*.*" />
+      <FFmpegFiles Condition=" '$(Platform)' == 'x64'" Include="$(ProjectDir)x64\*.*" />
+      <FFmpegFiles Condition=" '$(Platform)' == 'AnyCPU'" Include="$(ProjectDir)x64\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles=" @(FFmpegFiles)" DestinationFolder="$(OutDir)" />
+  </Target>
+  
 </Project>
