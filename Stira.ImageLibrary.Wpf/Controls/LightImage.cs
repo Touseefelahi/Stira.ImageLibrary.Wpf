@@ -66,12 +66,9 @@ namespace Stira.ImageLibrary.Wpf
             get => (bool)GetValue(IsColoredProperty);
             set
             {
-                if (value != IsColored)
-                {
-                    SetValue(IsColoredProperty, value);
-                    NumberOfChannels = IsColored ? 3 : 1;
-                    SetupImage();
-                }
+                SetValue(IsColoredProperty, value);
+                NumberOfChannels = IsColored ? 3 : 1;
+                SetupImage();
             }
         }
 
@@ -137,7 +134,7 @@ namespace Stira.ImageLibrary.Wpf
 
         private void SetupImage()
         {
-            if (Width != 0 && HeightImage != 0)
+            if (WidthImage != 0 && HeightImage != 0)
             {
                 const double dpi = 96;
                 RectBitmap = new Int32Rect(0, 0, WidthImage, HeightImage);

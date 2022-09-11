@@ -29,7 +29,7 @@
 		This must be fixed
 	</PackageReleaseNotes>
     <Configurations>Debug;Release;PublishOnLocal</Configurations>
-    <Version>3.2</Version>
+    <Version>3.2.1</Version>
     <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
